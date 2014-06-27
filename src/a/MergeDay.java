@@ -6,7 +6,7 @@ import org.json.simple.parser.ParseException;
 
 import dataRecovery.FormatDefaut;
 
-
+//test EGit
 public class MergeDay {
 	public static void main(String[] args) throws FileNotFoundException, IOException, ParseException{
 		String path = "/home/ricky/VLS/Washington/reserveur/";
