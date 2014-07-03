@@ -37,37 +37,6 @@ public class RealTime {
 	}
 
 
-//	/**
-//	 * get a file from an URL
-//	 * @param url the url
-//	 * @param pathOut name givent to the file (path)
-//	 * @throws IOException
-//	 * @throws InterruptedException
-//	 */
-//	public static void getFile(String url, String pathOut) throws IOException, InterruptedException {
-//
-//		URLConnection urlConnection = null;
-//		urlConnection = establishConnection(url);
-//		int size = urlConnection.getContentLength();
-//		InputStream inputStream = urlConnection.getInputStream();
-//		InputStream bufferedInputStream = new BufferedInputStream(inputStream);	
-//		byte[] data = new byte[size];
-//		int readOctects = 0;
-//		int move = 0; float alreadyRead = 0;
-//
-//		while(move < size){
-//			readOctects = bufferedInputStream.read(data, move, (data.length - move));
-//			alreadyRead = alreadyRead + readOctects;
-//			if(readOctects == -1) break; //end of file
-//			move += readOctects;
-//		}
-//
-//		bufferedInputStream.close();
-//		FileOutputStream fichierSortie = new FileOutputStream(pathOut);
-//		fichierSortie.write(data);
-//		fichierSortie.flush(); fichierSortie.close();
-//	}
-	
 	/**
 	 * get a file from an URL
 	 * @param url the url
@@ -77,16 +46,10 @@ public class RealTime {
 	 */
 	public static void getFile(String url, String pathOut) throws IOException, InterruptedException {
 
-		URL u = new URL(url); // velib http://api.citybik.es/v2/networks/velib
-		URLConnection urlConenction = null;
-		try {
-			urlConenction = u.openConnection();
-		} catch (IOException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
-		}
-		int size = urlConenction.getContentLength();
-		InputStream inputStream = urlConenction.getInputStream();
+		URLConnection urlConnection = null;
+		urlConnection = establishConnection(url);
+		int size = urlConnection.getContentLength();
+		InputStream inputStream = urlConnection.getInputStream();
 		InputStream bufferedInputStream = new BufferedInputStream(inputStream);	
 		byte[] data = new byte[size];
 		int readOctects = 0;
