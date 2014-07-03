@@ -1,19 +1,73 @@
 package dataRecovery;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+
 import org.json.simple.parser.ParseException;
 
 
 public class RealTime {
 
+	/** try to establish a connection, retry if it does not work
+	 * @param url a string used as url
+	 * @return an URLConnection
+	 * @throws MalformedURLException 
+	 */
+	public static URLConnection establishConnection(String url) throws MalformedURLException {
+		URL u = new URL(url);
+		URLConnection urlConnection = null;
+		try {
+			urlConnection = u.openConnection();
+		} catch (IOException e) {
+			// connection failed, try again.
+			try { Thread.sleep(1000); } catch (InterruptedException e1) {};
+
+			establishConnection(url);
+		}
+		return urlConnection;
+	}
+
+
+//	/**
+//	 * get a file from an URL
+//	 * @param url the url
+//	 * @param pathOut name givent to the file (path)
+//	 * @throws IOException
+//	 * @throws InterruptedException
+//	 */
+//	public static void getFile(String url, String pathOut) throws IOException, InterruptedException {
+//
+//		URLConnection urlConnection = null;
+//		urlConnection = establishConnection(url);
+//		int size = urlConnection.getContentLength();
+//		InputStream inputStream = urlConnection.getInputStream();
+//		InputStream bufferedInputStream = new BufferedInputStream(inputStream);	
+//		byte[] data = new byte[size];
+//		int readOctects = 0;
+//		int move = 0; float alreadyRead = 0;
+//
+//		while(move < size){
+//			readOctects = bufferedInputStream.read(data, move, (data.length - move));
+//			alreadyRead = alreadyRead + readOctects;
+//			if(readOctects == -1) break; //end of file
+//			move += readOctects;
+//		}
+//
+//		bufferedInputStream.close();
+//		FileOutputStream fichierSortie = new FileOutputStream(pathOut);
+//		fichierSortie.write(data);
+//		fichierSortie.flush(); fichierSortie.close();
+//	}
+	
 	/**
 	 * get a file from an URL
 	 * @param url the url
@@ -112,7 +166,7 @@ public class RealTime {
 		long t1,t2,t3 = 0;
 
 		String citiesString = 
-						" 0 - New York - Citi Bike NYC\n" +
+				" 0 - New York - Citi Bike NYC\n" +
 						" 1 - Chicago - Divvy\n" +
 						" 2 - San Francisco and others - Bay Area Bike Share\n" +
 						" 3 - Chattanooga - Bike Chattanooga\n" +
@@ -152,8 +206,10 @@ public class RealTime {
 			System.out.println(citiesString);
 		}
 
-		int cityInt = Integer.parseInt(args[0]);
-//		int cityInt = 5;
+		int cityInt = 5;
+		if (args.length!=0){
+			cityInt = Integer.parseInt(args[0]);
+		}
 
 		timeZone = City.getCityTimeZone(cityInt);
 		citySystem = City.getCitySystemString(cityInt);

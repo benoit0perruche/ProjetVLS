@@ -25,7 +25,7 @@ public class FormatCsv {
         	
         	oneData = new String[7];
         	
-        	oneData[0] = trip[0];        	
+        	oneData[0] = durationOk(trip[0]);       	
         	oneData[1] = dateOk(trip[1]);
         	oneData[2] = trip[3];
         	oneData[3] = dateOk(trip[4]);
