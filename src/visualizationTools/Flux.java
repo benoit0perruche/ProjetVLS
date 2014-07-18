@@ -13,7 +13,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import dataAnalysis.LireArff;
 
 public class Flux {
 
@@ -55,7 +54,7 @@ public class Flux {
 		fichier_source.close();
 		return tab;
 	}
-	
+
 	public static double[] index(String staticPath) throws FileNotFoundException, IOException, ParseException{
 		double[] index;
 		JSONParser parser = new JSONParser();
@@ -157,6 +156,86 @@ public class Flux {
 		fichier_source.close();
 		return tab;
 
+	}
+
+	public static double[][] bikesFluxIntervals(String tripsPath, String staticPath, double nbDay, int id) throws Exception{
+		double[][] sizeStations;
+		double[][] tab;
+
+		//get the size of each station, store it in sizeStations
+		JSONParser parser = new JSONParser();
+		Object obj = parser.parse(new FileReader(staticPath));
+		JSONObject jsonObject = (JSONObject) obj;
+		JSONArray stat = (JSONArray) jsonObject.get("stations");
+		int length = stat.size();
+		sizeStations = new double[length][2];
+		for(int i=0; i<length; i++){
+			JSONObject station = (JSONObject) stat.get(i);
+			sizeStations[i][0] = (Long) station.get("id");
+			sizeStations[i][1] = (Long) station.get("slots");
+		}
+
+		tab = new double[length][49];
+		double[] inMean = new double[length];
+		double[] outMean = new double[length];
+
+		BufferedReader fichier_source = new BufferedReader(new FileReader(tripsPath));
+		String chaine;
+
+		int in = 0;
+		int out = 0;
+		int i = 1;
+		while((chaine = fichier_source.readLine())!= null)
+		{
+			if(i>1){//avoid reading the first line
+				String[] tabChaine = chaine.split(",");
+				indexStation = new int[length];
+				//loop !
+				for(int j=0; j<length; j++){
+					if(id == 1){tab[j][0] = sizeStations[j][0];}
+					indexStation[j] = (int) sizeStations[j][0];
+					if(Long.parseLong(tabChaine[4])==sizeStations[j][0]){
+						in = j;
+					}
+					if(Long.parseLong(tabChaine[2])==sizeStations[j][0]){
+						out = j;
+					}
+				}
+
+				tab[in][id+Integer.parseInt(tabChaine[3])] = 
+						tab[in][id+Integer.parseInt(tabChaine[3])] +
+						//						1./sizeStations[in][1]/nbDay*100.;
+						1./nbDay;
+
+				tab[out][id+24+Integer.parseInt(tabChaine[1])] = 
+						tab[out][id+24+Integer.parseInt(tabChaine[1])] +
+						//						1./sizeStations[out][1]/nbDay*100.;
+						1./nbDay;
+			}
+			i++;
+		}
+
+		for(int l=0; l<length; l++){
+			for(int j=0; j<24+id; j++){	
+				inMean[l+id] += tab[l+id][id+j];
+				outMean[l+id] += tab[l+id][24+id+j];
+			}
+		}
+		//comment not to normalize
+		//
+		for(int l=0; l<tab.length; l++){
+			for(int j=0; j<24+id; j++){
+				if (inMean[id+l] != 0){
+					tab[id+l][id+j] = tab[id+l][id+j]/inMean[id+l] * 10;
+				}
+				if (outMean[id+l] != 0){
+					tab[id+l][id+24+j] = tab[id+l][id+24+j]/outMean[id+l] * 10;
+				}
+			}
+		}
+		//
+		fichier_source.close();
+		return tab;
 	}
 
 	public static void writeMatrixCsv(double[][] matrix,String pathOut, int id) throws IOException{
@@ -261,33 +340,31 @@ public class Flux {
 		//			System.out.println(tab[0][i]+" | "+tab[1][i]);
 		//		}
 
-//		@SuppressWarnings("unused")
-		double[][] matrixVweek = bikesFlux("/home/ricky/VLS/Washington/Washington-Week-January.csv",
-				"/home/ricky/VLS/Washington/capital-bikeshare_12-06-14_04h41_Static.json", 22.,0);
-		//		double[][] matrixVweekend = bikesFlux("weekend.csv",
-		//				"/home/ricky/VLS/Washington/capital-bikeshare_12-06-14_04h41_Static.json", 26.,0);
+		//		@SuppressWarnings("unused")
+//		double[][] matrixVweek = bikesFlux("/home/ricky/VLS/Washington/Washington-Week-January.csv",
+//				"static.json", 22.,0);
+				double[][] matrixVweek = bikesFluxIntervals("weekend.csv",
+						"static.json", 26.,0);
 
-		//		for(int l=0;l<320;l++){
-		//		for(int i=0;i<49;i++){
-		//			//			System.out.println("---|--in--|--out--------");
-		//			//			System.out.print("0" + i + " | ");
-		//			System.out.print(matrixVweek[l][i]+"|");
-		//		}
-		//		System.out.println();
-		//	}
+//		for(int l=0;l<319;l++){
+//			for(int i=0;i<49;i++){
+//				System.out.print(matrixVweek[l][i]+"|");
+//			}
+//			System.out.println();
+//		}
 
-		writeMatrixCsv(matrixVweek,"Vweek_noid.csv",0);
+		writeMatrixCsv(matrixVweek,"Vweek_noid2.csv",0);
 		//		writeMatrixCsv(matrixVweekend,"Vweekend_noid.csv",0);
-		writeMatrixOutCsv(matrixVweek,"Vweek_noid_Out.csv",0);
-		writeMatrixInCsv(matrixVweek,"Vweek_noid_In.csv",0);
+		writeMatrixOutCsv(matrixVweek,"Vweek_noid_Out2.csv",0);
+		writeMatrixInCsv(matrixVweek,"Vweek_noid_In2.csv",0);
 
 		//String[] list = readWekaCsv("save.csv",24);
 
-		int[] test = LireArff.lireArff("save.csv",24);
-
-		for (int i=0;i<indexStation.length;i++){
-			System.out.print(indexStation[i]);
-			System.out.println(" | " + test[i]);
-		}
+//		int[] test = dataAnalysis.LireArff.lireArff("save.csv",24);
+//
+//		for (int i=0;i<indexStation.length;i++){
+//			System.out.print(indexStation[i]);
+//			System.out.println(" | " + test[i]);
+//		}
 	}
 }

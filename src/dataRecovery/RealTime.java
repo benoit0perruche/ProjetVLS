@@ -49,6 +49,10 @@ public class RealTime {
 		URLConnection urlConnection = null;
 		urlConnection = establishConnection(url);
 		int size = urlConnection.getContentLength();
+		if (size <= 0){
+			Thread.sleep(60000);
+			getFile( url, pathOut);
+		}
 		InputStream inputStream = urlConnection.getInputStream();
 		InputStream bufferedInputStream = new BufferedInputStream(inputStream);	
 		byte[] data = new byte[size];
@@ -67,6 +71,43 @@ public class RealTime {
 		fichierSortie.write(data);
 		fichierSortie.flush(); fichierSortie.close();
 	}
+
+	//	/**
+	//	 * get a file from an URL
+	//	 * @param url the url
+	//	 * @param pathOut name givent to the file (path)
+	//	 * @throws IOException
+	//	 * @throws InterruptedException
+	//	 */
+	//	public static void getFile(String url, String pathOut) throws IOException, InterruptedException {
+	//
+	//		URL u = new URL(url); // velib http://api.citybik.es/v2/networks/velib
+	//		URLConnection urlConenction = null;
+	//		try {
+	//			urlConenction = u.openConnection();
+	//		} catch (IOException e) {
+	//			// Auto-generated catch block
+	//			e.printStackTrace();
+	//		}
+	//		int size = urlConenction.getContentLength();
+	//		InputStream inputStream = urlConenction.getInputStream();
+	//		InputStream bufferedInputStream = new BufferedInputStream(inputStream);	
+	//		byte[] data = new byte[size];
+	//		int readOctects = 0;
+	//		int move = 0; float alreadyRead = 0;
+	//
+	//		while(move < size){
+	//			readOctects = bufferedInputStream.read(data, move, (data.length - move));
+	//			alreadyRead = alreadyRead + readOctects;
+	//			if(readOctects == -1) break; //end of file
+	//			move += readOctects;
+	//		}
+	//
+	//		bufferedInputStream.close();
+	//		FileOutputStream fichierSortie = new FileOutputStream(pathOut);
+	//		fichierSortie.write(data);
+	//		fichierSortie.flush(); fichierSortie.close();
+	//	}
 
 	/** to call the right method of parsing depending of the cityInt
 	 * @param cityInt the cityInt
@@ -198,7 +239,7 @@ public class RealTime {
 			stat = parserStat(cityInt,citySystem+"/"+citySystem+"_station_feed.json");
 			Format.writeStat(stat,citySystem+"/"+citySystem+"_"+date+"_"+hourBeg+"_Static.json");
 			//parse and write the dynamic part
-			dyn = parserDyn(cityInt,citySystem+"/"+citySystem+"_station_feed.json");
+			dyn = parserDyn(cityInt,citySystem+"/"+citySystem+"_station_feed.json");//TODO
 			Format.writeDyn(dyn,citySystem+"/"+citySystem+"_dyna1.json");
 
 			//wait one minute between two get
@@ -217,13 +258,18 @@ public class RealTime {
 				getFile(urlBeg+citySystem,citySystem+"/"+citySystem+"_station_feed.json");
 				//convert
 				//parse and write the dynamic part
-				dyn = parserDyn(cityInt,citySystem+"/"+citySystem+"_station_feed.json");
-				Format.writeDyn(dyn,citySystem+"/"+citySystem+"_dyna2.json");
+				try{
+					dyn = parserDyn(cityInt,citySystem+"/"+citySystem+"_station_feed.json");//TODO
+					Format.writeDyn(dyn,citySystem+"/"+citySystem+"_dyna2.json");
 
-				FormatDefaut.merge(citySystem+"/"+citySystem+"_dyna1.json",
-						citySystem+"/"+citySystem+"_dyna2.json",
-						citySystem+"/"+citySystem+"_dyna3.json");
-				FormatDefaut.deleteDoubles(citySystem+"/"+citySystem+"_dyna3.json");
+					FormatDefaut.merge(citySystem+"/"+citySystem+"_dyna1.json",
+							citySystem+"/"+citySystem+"_dyna2.json",
+							citySystem+"/"+citySystem+"_dyna3.json");
+					FormatDefaut.deleteDoubles(citySystem+"/"+citySystem+"_dyna3.json");
+				}
+				catch(IOException e){
+					System.out.println(e);
+				}
 
 				//wait one minute between two get
 				t3 = System.currentTimeMillis();
@@ -238,14 +284,18 @@ public class RealTime {
 				getFile(urlBeg+citySystem,citySystem+"/"+citySystem+"_station_feed.json");
 				//convert
 				//parse and write the dynamic part
-				dyn = parserDyn(cityInt,citySystem+"/"+citySystem+"_station_feed.json");
-				Format.writeDyn(dyn,citySystem+"/"+citySystem+"_dyna2.json");
+				try{
+					dyn = parserDyn(cityInt,citySystem+"/"+citySystem+"_station_feed.json");//TODO
+					Format.writeDyn(dyn,citySystem+"/"+citySystem+"_dyna2.json");
 
-				FormatDefaut.merge(citySystem+"/"+citySystem+"_dyna3.json",
-						citySystem+"/"+citySystem+"_dyna2.json",
-						citySystem+"/"+citySystem+"_dyna1.json");
-				FormatDefaut.deleteDoubles(citySystem+"/"+citySystem+"_dyna1.json");
-
+					FormatDefaut.merge(citySystem+"/"+citySystem+"_dyna3.json",
+							citySystem+"/"+citySystem+"_dyna2.json",
+							citySystem+"/"+citySystem+"_dyna1.json");
+					FormatDefaut.deleteDoubles(citySystem+"/"+citySystem+"_dyna1.json");
+				}
+				catch(IOException e){
+					System.out.println(e);
+				}
 				//break if the day ends
 				testDay = System.currentTimeMillis();
 				testDay = testDay + timeZone*3600000;	//get the local time
@@ -265,7 +315,7 @@ public class RealTime {
 			now = now + timeZone*3600000;		//get the local time
 			hourEnd = hourFormat.format(now);	//timestamp
 
-			t2 = System.currentTimeMillis();	//start the timer (minute) //utile ? TODO
+			t2 = System.currentTimeMillis();	//start the timer (minute)
 
 			//get the last file of the hour
 			getFile(urlBeg+citySystem,citySystem+"/"+citySystem+"_station_feed.json");

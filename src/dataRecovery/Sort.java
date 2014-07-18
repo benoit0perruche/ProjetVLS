@@ -36,7 +36,7 @@ public class Sort {
     	}
     	reader.close();
     	FileWriter writer = new FileWriter(pathOut);
-    	writer.write("Duration,Start date,Start Station,Start terminal,End date,End Station,End terminal,Bike#,Member Type\n");
+    	writer.write("Duration,Start date,Start Station,Start terminal,End date,End Station,End terminal,Bike#,Member Type,Distance\n");
     	for (List<String> list : map.values()) {
     		for (String val : list) {
     			writer.write(val);
@@ -45,7 +45,7 @@ public class Sort {
     	}
     	writer.close();
     }
-   
+     
     void write(String pathOut, List<String[]> data) throws IOException{  
  	FileWriter writer = new FileWriter(pathOut);
  	//write the first line in the csv (the title of the columns)

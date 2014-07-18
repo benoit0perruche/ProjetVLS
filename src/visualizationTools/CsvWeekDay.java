@@ -114,8 +114,7 @@ public class CsvWeekDay {
 	}
 
 	public static void main(String[] arguments) throws IOException {
-		String pathIn = "/home/ricky/VLS/Washington/" +
-				"2014-1st-quarter_FormatOk.csv";
+		String pathIn = "trips.csv";
 
 		getWeek(pathIn, "week.csv");
 		getWeekEnd(pathIn, "weekend.csv");

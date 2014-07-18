@@ -27,7 +27,7 @@ public class FormatJCD extends Format{
 		JSONObject jsonObject = (JSONObject) obj;
 
 		// get an array from the JSON object
-		JSONObject net= (JSONObject) jsonObject.get("network");
+		JSONObject net = (JSONObject) jsonObject.get("network");
 		JSONObject location = (JSONObject) net.get("location");
 		city = (String) location.get("city");
 		country = (String) location.get("country");
